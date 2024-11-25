@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from collections import Counter
 from sklearn.preprocessing import MultiLabelBinarizer
+from textblob import TextBlob
 
 df = pd.read_csv("movies.csv")
 
@@ -18,7 +19,7 @@ genre_df = pd.DataFrame(genre_matrix, columns=mlb.classes_)
 df = pd.concat([df, genre_df], axis=1)
 
 # Frequency encoding for director
-df['director_encoded'] = df['Director'].map(df['Director'].value_counts())
+df['Director_Encoded'] = df['Director'].map(df['Director'].value_counts())
 
 # Mean imputation for Metascore and Revenue
 df['Metascore'] = df['Metascore'].fillna(df['Metascore'].mean())
@@ -27,7 +28,12 @@ df['Revenue'] = df['Revenue'].fillna(df['Revenue'].mean())
 # Drop rows where Director column is null
 df = df.dropna(subset=['Director'])
 
-df = df.drop(columns=["Genre", "Director", "Description", "Rank"])
+from textblob import TextBlob
+
+df['Polarity'] = df['Description'].apply(lambda x: TextBlob(x).sentiment.polarity)
+df['Subjectivity'] = df['Description'].apply(lambda x: TextBlob(x).sentiment.subjectivity)
+
+df = df.drop(columns=["Genre", "Director", "Description", "Rank", "Vote"])
 
 # Moving Title to the last column in the DataFrame
 title_column = df.pop('Title')
@@ -36,7 +42,7 @@ df['Title'] = title_column
 def euclidean_distance(sample1, sample2):
     return np.sqrt(np.sum((sample1 - sample2) ** 2))
 
-def knn(train_data, train_labels, test_point, k=3):
+def knn(train_data, train_labels, test_point, k):
     # Calculate the distance from the test point to each training data point
     distances = []
     for i, data_point in enumerate(train_data):
