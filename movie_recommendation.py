@@ -57,7 +57,7 @@ def knn(train_data, train_labels, test_point, k):
 
 st.title("Movie Recommender")
 st.subheader("This system will recommend 4 similar movies.")
-movie_title = st.text_input("Enter the title of a movie you have watched.")
+movie_title = st.text_input("Enter a movie title.")
 
 if movie_title:
     if movie_title in df["Title"].values:
